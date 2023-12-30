@@ -74,13 +74,9 @@ private:
 
 
 template<typename Count>
-void swap(
-	linear_ringbuffer_<Count>& lhs,
-	linear_ringbuffer_<Count>& rhs) noexcept;
+void swap(linear_ringbuffer_<Count>& lhs, linear_ringbuffer_<Count>& rhs) noexcept;
 
-
-struct initialization_error : public std::runtime_error
-{
+struct initialization_error : public std::runtime_error {
 	initialization_error(int error);
 	int error;
 };
@@ -140,29 +136,25 @@ size_t linear_ringbuffer_<T>::free_size() const noexcept {
 
 
 template<typename T>
-auto linear_ringbuffer_<T>::cbegin() const noexcept -> const_iterator
-{
+auto linear_ringbuffer_<T>::cbegin() const noexcept -> const_iterator {
 	return buffer_ + head_;
 }
 
 
 template<typename T>
-auto linear_ringbuffer_<T>::begin() const noexcept -> const_iterator
-{
+auto linear_ringbuffer_<T>::begin() const noexcept -> const_iterator {
 	return cbegin();
 }
 
 
 template<typename T>
-auto linear_ringbuffer_<T>::read_head() noexcept -> iterator
-{
+auto linear_ringbuffer_<T>::read_head() noexcept -> iterator {
 	return buffer_ + head_;
 }
 
 
 template<typename T>
-auto linear_ringbuffer_<T>::cend() const noexcept -> const_iterator
-{
+auto linear_ringbuffer_<T>::cend() const noexcept -> const_iterator {
 	// Fix up `end` if needed so that [begin, end) is always a
 	// valid range.
 	return head_ < tail_ ?
@@ -172,15 +164,13 @@ auto linear_ringbuffer_<T>::cend() const noexcept -> const_iterator
 
 
 template<typename T>
-auto linear_ringbuffer_<T>::end() const noexcept -> const_iterator
-{
+auto linear_ringbuffer_<T>::end() const noexcept -> const_iterator {
 	return cend();
 }
 
 
 template<typename T>
-auto linear_ringbuffer_<T>::write_head() noexcept -> iterator
-{
+auto linear_ringbuffer_<T>::write_head() noexcept -> iterator {
 	return buffer_ + tail_;
 }
 
@@ -201,8 +191,7 @@ linear_ringbuffer_<T>::linear_ringbuffer_(size_t minsize)
   , capacity_(0)
   , head_(0)
   , tail_(0)
-  , size_(0)
-{
+  , size_(0) {
 	int res = this->initialize(minsize);
 	if (res == -1) {
 		throw initialization_error {errno};
@@ -211,8 +200,7 @@ linear_ringbuffer_<T>::linear_ringbuffer_(size_t minsize)
 
 
 template<typename T>
-linear_ringbuffer_<T>::linear_ringbuffer_(linear_ringbuffer_&& other) noexcept
-{
+linear_ringbuffer_<T>::linear_ringbuffer_(linear_ringbuffer_&& other) noexcept {
 	linear_ringbuffer_ tmp(delayed_init {});
 	tmp.swap(other);
 	this->swap(tmp);
@@ -221,8 +209,7 @@ linear_ringbuffer_<T>::linear_ringbuffer_(linear_ringbuffer_&& other) noexcept
 
 template<typename T>
 auto linear_ringbuffer_<T>::operator=(linear_ringbuffer_&& other) noexcept
-	-> linear_ringbuffer_&
-{
+	-> linear_ringbuffer_& {
 	linear_ringbuffer_ tmp(delayed_init {});
 	tmp.swap(other);
 	this->swap(tmp);
@@ -250,7 +237,7 @@ int linear_ringbuffer_<T>::initialize(size_t minsize) noexcept {
 	}
 
 	// Round up to nearest multiple of page size.
-	auto bytes = minsize & ~(PAGE_SIZE - 1);
+    size_t bytes = minsize & ~(PAGE_SIZE - 1);
 	if (minsize % PAGE_SIZE) {
 		bytes += PAGE_SIZE;
 	}
@@ -327,8 +314,7 @@ void linear_ringbuffer_<T>::uninitialize() noexcept {
 }
 #else
 template<typename T>
-int linear_ringbuffer_<T>::initialize(size_t minsize) noexcept
-{
+int linear_ringbuffer_<T>::initialize(size_t minsize) noexcept {
 #ifdef PAGESIZE
 	static constexpr size_t PAGE_SIZE = PAGESIZE;
 #else
@@ -347,7 +333,7 @@ int linear_ringbuffer_<T>::initialize(size_t minsize) noexcept
 	}
 
 	// Round up to nearest multiple of page size.
-	int bytes = minsize & ~(PAGE_SIZE - 1);
+    size_t bytes = minsize & ~(PAGE_SIZE - 1);
 	if (minsize % PAGE_SIZE) {
 		bytes += PAGE_SIZE;
 	}
@@ -416,8 +402,7 @@ void linear_ringbuffer_<T>::uninitialize() noexcept {
 
 
 template<typename T>
-linear_ringbuffer_<T>::~linear_ringbuffer_()
-{
+linear_ringbuffer_<T>::~linear_ringbuffer_() {
 	// Either `buffer_` and `capacity_` are both initialized properly,
 	// or both are zero.
 	uninitialize();
@@ -425,8 +410,7 @@ linear_ringbuffer_<T>::~linear_ringbuffer_()
 
 
 template<typename T>
-void linear_ringbuffer_<T>::swap(linear_ringbuffer_<T>& other) noexcept
-{
+void linear_ringbuffer_<T>::swap(linear_ringbuffer_<T>& other) noexcept {
 	using std::swap;
 	swap(buffer_, other.buffer_);
 	swap(capacity_, other.capacity_);
@@ -437,10 +421,7 @@ void linear_ringbuffer_<T>::swap(linear_ringbuffer_<T>& other) noexcept
 
 
 template<typename Count>
-void swap(
-	linear_ringbuffer_<Count>& lhs,
-	linear_ringbuffer_<Count>& rhs) noexcept
-{
+void swap(linear_ringbuffer_<Count>& lhs, linear_ringbuffer_<Count>& rhs) noexcept {
 	lhs.swap(rhs);
 }
 
@@ -449,4 +430,3 @@ inline initialization_error::initialization_error(int errno_)
   : std::runtime_error(::strerror(errno_))
   , error(errno_)
 {}
-
